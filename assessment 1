@@ -1,0 +1,112 @@
+#include<stdio.h>
+
+main()
+{
+	
+	int i,j,k;
+	int m;
+	printf("\nEnter 1st Matrix Row Size: ");
+	scanf("%d",&m);
+	
+	int n;
+	printf("\nEnter 1st Matrix Collum Size: ");
+	scanf("%d",&n);
+	printf("***********************************\n");
+
+	int p;
+	printf("\nEnter 2nd Matrix Row Size: ");
+	scanf("%d",&p);
+	
+	int q;
+	printf("\nEnter 2nd Matrix Collum Size: ");
+	scanf("%d",&q);
+	printf("\n***********************************\n");
+	
+	 
+	 
+	 if(n!=p)
+	 {
+	 	printf(" Invalid Multipication!!");
+	 }
+	 
+
+	 else
+	 
+{
+
+			
+	int a[m][n];
+
+	 for(i=0;i<m;i++)
+	 {
+	 	for(j=0;j<n;j++)
+	 	{
+	 		printf("Enter First Matrix [%d][%d] Elements: ",i,j);
+			 scanf("%d",&a[i][j]);
+	 		
+		 }
+	 }
+	 printf("\na[%d][%d] Elements Are:\n\n",i,j);
+	 for(i=0;i<m;i++)
+	 {
+	 	for(j=0;j<n;j++)
+	 	{
+	 		printf("%d\t",a[i][j]);
+			 
+	 		
+		 }printf("\n");
+	 }
+	 
+	 printf("**********************************\n");
+
+ 	int b[p][q];
+
+	
+	for(i=0;i<p;i++)
+	 {
+	 	for(j=0;j<q;j++)
+	 	{
+	 		printf("Enter Second Matrix [%d][%d] Elements: ",i,j);
+			 scanf("%d",&b[i][j]);
+	 		
+		 }
+	 }
+	 
+	 printf("\nb[%d][%d] Elements Are:\n",i,j);
+	 for(i=0;i<p;i++)
+	 {
+	 	for(j=0;j<q;j++)
+	 	{
+	 		printf("%d\t",b[i][j]);
+			 
+	 		
+		 }printf("\n");
+	 }
+	 
+	int result[m][q];
+	 
+	 printf("\nThe multipication of a[%d][%d] X b[%d][%d] :\n",m,n,p,q);
+	 
+	 for(i=0;i<m;i++)
+	 {
+	 	for(j=0;j<q;j++)
+	 	{
+	 		result[i][j] =0;
+	 		for(k=0;k<n;k++)
+	 		{
+	 			result[i][j] += a[i][k]*b[k][j];
+			 }
+		 }
+	 }
+	 for(i=0;i<m;i++)
+	 {
+	 	for(j=0;j<q;j++)
+	 	{
+	 		printf("%d\t",result[i][j]);
+		 }printf("\n");
+	 }
+}
+		
+		 
+
+}
