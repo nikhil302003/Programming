@@ -43,9 +43,9 @@ public:
 class LectureManagementSystem
 {
 private:
-    static const int MAX_LECTURERS = 5;   // Maximum lecturers
-    Lecturer lecturers[MAX_LECTURERS];   // Array of Lecturer objects
-    int lecturerCount;                   // Number of lecturers added
+    static const int MAX_LECTURERS = 5;   
+    Lecturer lecturers[MAX_LECTURERS];   
+    int lecturerCount;                  
 
 public:
     
@@ -58,7 +58,7 @@ public:
         }
         else
         {
-            cout << "❌ Cannot add more lecturers. Limit reached!" << endl;
+            cout << " Cannot add more lecturers. Limit reached!" << endl;
         }
     }
 
