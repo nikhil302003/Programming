@@ -1,0 +1,105 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+
+class Lecturer
+{
+
+private:
+    // Data Members (Encapsulation)
+    string lecturerName;
+    string subjectName;
+    string courseName;
+
+public:
+ 
+    Lecturer()
+    {
+        lecturerName = "";
+        subjectName = "";
+        courseName = "";
+    }
+
+   
+    void assignInitialValues(string name, string subject, string course)
+    {
+        lecturerName = name;
+        subjectName = subject;
+        courseName = course;
+    }
+
+    
+    void displayLectureDetails() const
+    {
+        cout << "Lecturer Name : " << lecturerName << endl;
+        cout << "Subject Name  : " << subjectName << endl;
+        cout << "Course Name   : " << courseName << endl;
+        cout << "----------------------------------" << endl;
+    }
+};
+
+
+class LectureManagementSystem
+{
+private:
+    static const int MAX_LECTURERS = 5;   
+    Lecturer lecturers[MAX_LECTURERS];   
+    int lecturerCount;                  
+
+public:
+    
+    void addLectureDetails(string name, string subject, string course)
+    {
+        if (lecturerCount < MAX_LECTURERS)
+        {
+            lecturers[lecturerCount].assignInitialValues(name, subject, course);
+            lecturerCount++;
+        }
+        else
+        {
+            cout << " Cannot add more lecturers. Limit reached!" << endl;
+        }
+    }
+
+   
+    void displayAllLecturers() const
+    {
+        cout << "\n========= Lecture Management System =========\n";
+        for (int i = 0; i < lecturerCount; i++)
+        {
+            cout << "\nLecturer " << (i + 1) << " Details:\n";
+            lecturers[i].displayLectureDetails();
+        }
+    }
+};
+
+
+int main()
+{
+    LectureManagementSystem system;
+    string name, subject, course;
+
+    cout << "Enter details of 5 Lecturers\n";
+    cout << "=================================\n";
+
+    // Loop to input lecturer details
+    for (int i = 0; i < 5; i++)
+    {
+        cout << "\nLecturer " << (i + 1) << endl;
+
+        cout << "Enter Lecturer Name : ";
+        getline(cin, name);
+
+        cout << "Enter Subject Name  : ";
+        getline(cin, subject);
+
+        cout << "Enter Course Name   : ";
+        getline(cin, course);
+
+        system.addLectureDetails(name, subject, course);
+    }
+   system.displayAllLecturers();
+
+}
