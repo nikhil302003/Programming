@@ -1,148 +1,106 @@
-# ============================
-# MediTrack - Pharmacy Console App
-# QuickMed Pharmacy
-# ============================
-
 from datetime import datetime
 
-# ----------------------------
-# In-memory data storage
-# ----------------------------
+# Medicine data
 inventory = {
-    "Paracetamol": {"price": 10.0, "stock": 100},
-    "Cough Syrup": {"price": 75.0, "stock": 40},
-    "Vitamin C": {"price": 5.0, "stock": 200}
+    "Paracetamol": {"price": 10, "stock": 100},
+    "Cough Syrup": {"price": 75, "stock": 40},
+    "Vitamin C": {"price": 5, "stock": 200}
 }
 
 sales = []
 
 
-# ----------------------------
-# Display Inventory
-# ----------------------------
-def view_inventory():
-    print("\n========== CURRENT INVENTORY ==========")
-    print(f"{'Medicine':15} {'Price':10} {'Stock':10}")
-    print("-" * 40)
-
-    for medicine, details in inventory.items():
-        print(f"{medicine:15} ₹{details['price']:<9} {details['stock']:<10}")
-
-    print("-" * 40)
+def show_inventory():
+    print("\n--- Inventory ---")
+    print("Medicine        Price   Stock")
+    print("------------------------------")
+    for name in inventory:
+        print(f"{name:15} {inventory[name]['price']:6} {inventory[name]['stock']:6}")
 
 
-# ----------------------------
-# Add or Update Medicine
-# ----------------------------
-def add_or_update_medicine():
+def add_medicine():
+    name = input("\nMedicine name: ")
     try:
-        name = input("\nEnter medicine name: ").strip()
-
-        price = float(input("Enter price: "))
-        stock = int(input("Enter stock quantity: "))
+        price = float(input("Price: "))
+        stock = int(input("Stock: "))
 
         if name in inventory:
             inventory[name]["price"] = price
             inventory[name]["stock"] += stock
-            print("✔ Medicine updated successfully.")
+            print("Medicine updated.")
         else:
             inventory[name] = {"price": price, "stock": stock}
-            print("✔ Medicine added successfully.")
+            print("Medicine added.")
 
-    except ValueError:
-        print("❌ Invalid input. Please enter valid numbers.")
-
-
-# ----------------------------
-# Process Medicine Sale
-# ----------------------------
-def process_sale():
-    try:
-        customer = input("\nEnter customer name: ").strip()
-        medicine = input("Enter medicine name: ").strip()
-        quantity = int(input("Enter quantity: "))
-
-        if medicine not in inventory:
-            print("❌ Medicine not found.")
-            return
-
-        if inventory[medicine]["stock"] < quantity:
-            print("❌ Insufficient stock available.")
-            return
-
-        total_price = quantity * inventory[medicine]["price"]
-        inventory[medicine]["stock"] -= quantity
-
-        sale = {
-            "customer": customer,
-            "medicine": medicine,
-            "quantity": quantity,
-            "total": total_price,
-            "date": datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-        }
-
-        sales.append(sale)
-
-        print("\n========== BILL ==========")
-        print(f"Customer : {customer}")
-        print(f"Medicine : {medicine}")
-        print(f"Quantity : {quantity}")
-        print(f"Total    : ₹{total_price}")
-        print(f"Date     : {sale['date']}")
-        print("==========================")
-
-    except ValueError:
-        print("❌ Please enter a valid quantity.")
+    except:
+        print("Wrong input.")
 
 
-# ----------------------------
-# View Sales History
-# ----------------------------
-def view_sales():
-    if not sales:
-        print("\nNo sales recorded yet.")
+def sell_medicine():
+    customer = input("\nCustomer name: ")
+    medicine = input("Medicine name: ")
+
+    if medicine not in inventory:
+        print("Medicine not available.")
         return
 
-    print("\n========== SALES HISTORY ==========")
+    try:
+        qty = int(input("Quantity: "))
+
+        if qty > inventory[medicine]["stock"]:
+            print("Not enough stock.")
+            return
+
+        total = qty * inventory[medicine]["price"]
+        inventory[medicine]["stock"] -= qty
+
+        sales.append({
+            "customer": customer,
+            "medicine": medicine,
+            "qty": qty,
+            "total": total,
+            "date": datetime.now().strftime("%d-%m-%Y %H:%M")
+        })
+
+        print("\n--- Bill ---")
+        print("Customer:", customer)
+        print("Medicine:", medicine)
+        print("Quantity:", qty)
+        print("Total: ₹", total)
+
+    except:
+        print("Invalid quantity.")
+
+
+def show_sales():
+    if not sales:
+        print("\nNo sales yet.")
+        return
+
+    print("\n--- Sales History ---")
     for s in sales:
-        print(
-            f"{s['date']} | {s['customer']} | "
-            f"{s['medicine']} x{s['quantity']} | ₹{s['total']}"
-        )
-    print("-" * 40)
+        print(f"{s['date']} | {s['customer']} | {s['medicine']} x{s['qty']} | ₹{s['total']}")
 
 
-# ----------------------------
-# Main Menu
-# ----------------------------
-def main_menu():
-    while True:
-        print("\n========= MediTrack Menu =========")
-        print("1. View Inventory")
-        print("2. Add / Update Medicine")
-        print("3. Process Sale")
-        print("4. View Sales History")
-        print("5. Exit")
-        print("=================================")
+while True:
+    print("\n1. View Inventory")
+    print("2. Add Medicine")
+    print("3. Sell Medicine")
+    print("4. View Sales")
+    print("5. Exit")
 
-        choice = input("Enter your choice (1-5): ")
+    choice = input("Choose: ")
 
-        if choice == "1":
-            view_inventory()
-        elif choice == "2":
-            add_or_update_medicine()
-        elif choice == "3":
-            process_sale()
-        elif choice == "4":
-            view_sales()
-        elif choice == "5":
-            print("\nThank you for using MediTrack!")
-            break
-        else:
-            print("❌ Invalid choice. Try again.")
-
-
-# ----------------------------
-# Program Start
-# ----------------------------
-main_menu()
+    if choice == "1":
+        show_inventory()
+    elif choice == "2":
+        add_medicine()
+    elif choice == "3":
+        sell_medicine()
+    elif choice == "4":
+        show_sales()
+    elif choice == "5":
+        print("Goodbye!")
+        break
+    else:
+        print("Invalid choice.")
