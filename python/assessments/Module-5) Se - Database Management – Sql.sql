@@ -13,7 +13,7 @@ CREATE TABLE AccountHolder (
     city VARCHAR(100),
     contact VARCHAR(15),
     date_of_account_created DATE,
-    account_status VARCHAR(20),     -- 'active' or 'terminated'
+    account_status VARCHAR(20),     
     account_type VARCHAR(50),
     balance DECIMAL(15, 2)
 );
@@ -67,4 +67,5 @@ GROUP BY branch_city;
 
 SELECT ah.account_holder_id, ah.account_holder_name, l.branch_id, l.loan_amount
 FROM AccountHolder ah
+
 JOIN Loan l ON ah.account_holder_id = l.account_holder_id;
