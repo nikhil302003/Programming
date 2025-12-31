@@ -1,71 +1,70 @@
 
+
 CREATE TABLE Bank (
     branch_id INT PRIMARY KEY,
-    branch_name VARCHAR(100),
-    branch_city VARCHAR(100)
+    branch_name VARCHAR(50),
+    city VARCHAR(50)
 );
 
 
 CREATE TABLE AccountHolder (
-    account_holder_id INT PRIMARY KEY,
-    account_no VARCHAR(20) UNIQUE,
-    account_holder_name VARCHAR(100),
-    city VARCHAR(100),
-    contact VARCHAR(15),
-    date_of_account_created DATE,
-    account_status VARCHAR(20),     
-    account_type VARCHAR(50),
-    balance DECIMAL(15, 2)
+    id INT PRIMARY KEY,
+    account_no VARCHAR(20),
+    name VARCHAR(50),
+    city VARCHAR(50),
+    balance DECIMAL(10,2),
+    account_created DATE
 );
 
 
 CREATE TABLE Loan (
-    loan_no INT PRIMARY KEY,
+    loan_id INT PRIMARY KEY,
     branch_id INT,
-    account_holder_id INT,
-    loan_amount DECIMAL(15, 2),
-    loan_type VARCHAR(50),
+    account_id INT,
+    loan_amount DECIMAL(10,2),
+    loan_type VARCHAR(30),
+
     FOREIGN KEY (branch_id) REFERENCES Bank(branch_id),
-    FOREIGN KEY (account_holder_id) REFERENCES AccountHolder(account_holder_id)
+    FOREIGN KEY (account_id) REFERENCES AccountHolder(id)
 );
 
 
-SET @accountA = 'A_account_no';  -- replace with actual account no
-SET @accountB = 'B_account_no';  -- replace with actual account no
-SET @transferAmount = 100;
-
 START TRANSACTION;
 
+UPDATE AccountHolder
+SET balance = balance - 100
+WHERE account_no = 'A001';
 
 UPDATE AccountHolder
-SET balance = balance - @transferAmount
-WHERE account_no = @accountA AND balance >= @transferAmount;
-
-
-UPDATE AccountHolder
-SET balance = balance + @transferAmount
-WHERE account_no = @accountB;
-
+SET balance = balance + 100
+WHERE account_no = 'B001';
 
 COMMIT;
 
 
-SELECT DISTINCT ah1.*
-FROM AccountHolder ah1
-JOIN AccountHolder ah2 ON ah1.city = ah2.city AND ah1.account_holder_id <> ah2.account_holder_id;
-
-
-SELECT account_no, account_holder_name
+SELECT *
 FROM AccountHolder
-WHERE DAY(date_of_account_created) > 15;
+WHERE city IN (
+    SELECT city
+    FROM AccountHolder
+    GROUP BY city
+    HAVING COUNT(*) > 1
+);
 
 
-SELECT branch_city AS city_name, COUNT(branch_id) AS Count_Branch
+SELECT account_no, name
+FROM AccountHolder
+WHERE DAY(account_created) > 15;
+
+
+SELECT city, COUNT(*) AS total_branches
 FROM Bank
-GROUP BY branch_city;
+GROUP BY city;
 
 
-SELECT ah.account_holder_id, ah.account_holder_name, l.branch_id, l.loan_amount
-FROM AccountHolder ah
+SELECT a.id, a.name, l.loan_amount
+FROM AccountHolder a
+JOIN Loan l
+ON a.id = l.account_id;
 
-JOIN Loan l ON ah.account_holder_id = l.account_holder_id;
+
