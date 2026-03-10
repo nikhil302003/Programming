@@ -1,0 +1,35 @@
+from setuptools import setup, find_packages
+
+setup(
+    name='edutracker-api',
+    version='1.0.0',
+    description='Django REST API for EduTracker EdTech Platform',
+    author='EduTracker Solutions',
+    author_email='info@edutracker.com',
+    packages=find_packages(),
+    install_requires=[
+        'Django==4.2.7',
+        'djangorestframework==3.14.0',
+        'django-cors-headers==4.3.1',
+        'python-decouple==3.8',
+        'djangorestframework-simplejwt==5.3.0',
+        'channels==4.0.0',
+        'channels-redis==4.1.0',
+        'redis==5.0.1',
+        'django-ratelimit==4.1.0',
+        'Pillow==10.1.0',
+        'django-environ==0.11.2',
+    ],
+    python_requires='>=3.8',
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Education',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Framework :: Django',
+    ],
+)

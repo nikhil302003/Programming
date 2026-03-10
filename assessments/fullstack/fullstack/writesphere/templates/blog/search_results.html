@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results - WriteSphere{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Search Results</h2>
+            <a href="{% url 'blog:home' %}" class="btn btn-outline-secondary">Back to Home</a>
+        </div>
+
+        <!-- Search Form -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Search Posts</h5>
+                <form method="get" class="search-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.query.id_for_label }}" class="form-label">Keywords</label>
+                                {{ form.query }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
+                                {{ form.category }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.author.id_for_label }}" class="form-label">Author</label>
+                                {{ form.author }}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="{{ form.date_from.id_for_label }}" class="form-label">From Date</label>
+                                {{ form.date_from }}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="{{ form.date_to.id_for_label }}" class="form-label">To Date</label>
+                                {{ form.date_to }}
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        {% if search_query %}
+            <h4>Results for "{{ search_query }}"</h4>
+        {% endif %}
+        
+        {% if posts %}
+            <p class="text-muted">Found {{ posts|length }} post{{ posts|length|pluralize }}</p>
+            
+            {% for post in posts %}
+            <article class="card post-card mb-4">
+                {% if post.cover_image %}
+                <img src="{{ post.cover_image.url }}" class="card-img-top" alt="{{ post.title }}" style="height: 200px; object-fit: cover;">
+                {% endif %}
+                
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h3 class="card-title">
+                            <a href="{{ post.get_absolute_url }}" class="post-title">{{ post.title }}</a>
+                        </h3>
+                        {% if post.featured %}
+                        <span class="badge bg-warning text-dark">Featured</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="author-info">
+                        {% if post.author.profile_picture %}
+                        <img src="{{ post.author.profile_picture.url }}" alt="{{ post.author.username }}" class="author-avatar">
+                        {% else %}
+                        <div class="author-avatar bg-secondary d-flex align-items-center justify-content-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <strong>{{ post.author.get_full_name|default:post.author.username }}</strong>
+                            <br>
+                            <small class="text-muted">{{ post.created_at|date:"F d, Y" }}</small>
+                        </div>
+                    </div>
+                    
+                    <p class="card-text">{{ post.excerpt }}</p>
+                    
+                    {% if post.category %}
+                    <div class="mb-2">
+                        <a href="{% url 'blog:category_detail' post.category.slug %}" class="badge bg-primary">{{ post.category.name }}</a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if post.tags.all %}
+                    <div class="mb-3">
+                        {% for tag in post.tags.all %}
+                        <a href="{% url 'blog:tag_detail' tag.slug %}" class="tag">{{ tag.name }}</a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="post-meta">
+                            <small>
+                                <i class="fas fa-eye"></i> {{ post.views_count }} views
+                                <span class="mx-2">|</span>
+                                <i class="fas fa-heart"></i> {{ post.likes.count }}
+                                <span class="mx-2">|</span>
+                                <i class="fas fa-comment"></i> {{ post.comments.count }}
+                            </small>
+                        </div>
+                        <div class="reading-time">
+                            <small><i class="fas fa-clock"></i> {{ post.reading_time }} min read</small>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+            
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4>No posts found</h4>
+                <p class="text-muted">
+                    {% if search_query %}
+                        No posts match your search criteria. Try adjusting your filters.
+                    {% else %}
+                        Enter search criteria to find posts.
+                    {% endif %}
+                </p>
+                <a href="{% url 'blog:home' %}" class="btn btn-primary">Browse All Posts</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Sidebar -->
+        <aside>
+            <!-- Popular Categories -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Popular Categories</h5>
+                    {% for category in categories %}
+                    <a href="{% url 'blog:category_detail' category.slug %}" class="d-block mb-2 text-decoration-none">
+                        {{ category.name }}
+                    </a>
+                    {% empty %}
+                    <p class="text-muted">No categories yet</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            {% if user.is_authenticated %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Links</h5>
+                    <a href="{% url 'blog:post_create' %}" class="btn btn-primary btn-sm mb-2 d-block">Write New Post</a>
+                    <a href="{% url 'blog:my_posts' %}" class="btn btn-outline-primary btn-sm mb-2 d-block">My Posts</a>
+                    <a href="{% url 'users:dashboard' %}" class="btn btn-outline-primary btn-sm d-block">Dashboard</a>
+                </div>
+            </div>
+            {% endif %}
+        </aside>
+    </div>
+</div>
+{% endblock %}

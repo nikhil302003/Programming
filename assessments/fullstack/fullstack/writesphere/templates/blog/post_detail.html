@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - WriteSphere{% endblock %}
+
+{% block extra_css %}
+<style>
+    .post-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+    .post-content blockquote {
+        border-left: 4px solid #007bff;
+        padding-left: 1rem;
+        margin: 1.5rem 0;
+        font-style: italic;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <article class="mb-4">
+            <!-- Post Header -->
+            <header class="mb-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h1 class="display-5">{{ post.title }}</h1>
+                    {% if post.featured %}
+                    <span class="badge bg-warning text-dark fs-6">Featured</span>
+                    {% endif %}
+                </div>
+                
+                <div class="author-info">
+                    {% if post.author.profile_picture %}
+                    <img src="{{ post.author.profile_picture.url }}" alt="{{ post.author.username }}" class="author-avatar">
+                    {% else %}
+                    <div class="author-avatar bg-secondary d-flex align-items-center justify-content-center">
+                        <i class="fas fa-user text-white"></i>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h4 class="mb-1">
+                            <a href="{% url 'users:profile' post.author.username %}" class="text-decoration-none">
+                                {{ post.author.get_full_name|default:post.author.username }}
+                            </a>
+                        </h4>
+                        <div class="text-muted">
+                            <small>
+                                <i class="fas fa-calendar"></i> {{ post.created_at|date:"F d, Y" }}
+                                {% if post.updated_at != post.created_at %}
+                                <span class="mx-2">|</span>
+                                <i class="fas fa-edit"></i> Updated {{ post.updated_at|date:"F d, Y" }}
+                                {% endif %}
+                                <span class="mx-2">|</span>
+                                <i class="fas fa-clock"></i> {{ post.reading_time }} min read
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Cover Image -->
+            {% if post.cover_image %}
+            <div class="mb-4">
+                <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="img-fluid rounded">
+            </div>
+            {% endif %}
+
+            <!-- Post Meta -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    {% if post.category %}
+                    <a href="{% url 'blog:category_detail' post.category.slug %}" class="badge bg-primary fs-6">{{ post.category.name }}</a>
+                    {% endif %}
+                </div>
+                <div class="post-meta">
+                    <small>
+                        <i class="fas fa-eye"></i> {{ post.views_count }} views
+                        <span class="mx-2">|</span>
+                        <i class="fas fa-heart"></i> <span class="likes-count-{{ post.id }}">{{ post.likes.count }}</span>
+                        <span class="mx-2">|</span>
+                        <i class="fas fa-comment"></i> {{ post.comments.count }}
+                    </small>
+                </div>
+            </div>
+
+            <!-- Tags -->
+            {% if post.tags.all %}
+            <div class="mb-4">
+                {% for tag in post.tags.all %}
+                <a href="{% url 'blog:tag_detail' tag.slug %}" class="tag">{{ tag.name }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Post Content -->
+            <div class="post-content mb-4">
+                {{ post.content|safe }}
+            </div>
+
+            <!-- Interaction Buttons -->
+            {% if user.is_authenticated %}
+            <div class="interaction-buttons">
+                <form action="{% url 'interactions:like_post' post.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn like-btn {% if is_liked %}liked{% endif %}" data-post-id="{{ post.id }}">
+                        {% if is_liked %}
+                        <i class="fas fa-heart"></i> Liked
+                        {% else %}
+                        <i class="far fa-heart"></i> Like
+                        {% endif %}
+                    </button>
+                </form>
+                
+                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#commentModal">
+                    <i class="fas fa-comment"></i> Comment
+                </button>
+                
+                {% if user != post.author %}
+                <a href="{% url 'users:follow_user' post.author.username %}" class="btn btn-outline-success">
+                    <i class="fas fa-user-plus"></i> Follow {{ post.author.username }}
+                </a>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="interaction-buttons">
+                <a href="{% url 'users:login' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-heart"></i> Like
+                </a>
+                <a href="{% url 'users:login' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-comment"></i> Comment
+                </a>
+            </div>
+            {% endif %}
+        </article>
+
+        <!-- Comments Section -->
+        <section class="comments-section">
+            <h3 class="mb-4">Comments ({{ comments.count }})</h3>
+            
+            <!-- Comment Form Modal -->
+            {% if user.is_authenticated %}
+            <div class="modal fade" id="commentModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add Comment</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form class="comment-form" data-post-id="{{ post.id }}">
+                                {% csrf_token %}
+                                <input type="hidden" name="parent_id" id="parent-comment-id">
+                                <div class="mb-3">
+                                    <textarea name="content" class="form-control" rows="4" placeholder="Write your comment..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Post Comment</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Comments List -->
+            <div class="comments-list">
+                {% for comment in comments %}
+                <div class="comment mb-3" id="comment-{{ comment.id }}">
+                    <div class="d-flex">
+                        {% if comment.author.profile_picture %}
+                        <img src="{{ comment.author.profile_picture.url }}" alt="{{ comment.author.username }}" class="author-avatar me-3">
+                        {% else %}
+                        <div class="author-avatar bg-secondary d-flex align-items-center justify-content-center me-3">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        {% endif %}
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">
+                                    <a href="{% url 'users:profile' comment.author.username %}" class="text-decoration-none">
+                                        {{ comment.author.get_full_name|default:comment.author.username }}
+                                    </a>
+                                </h6>
+                                <small class="text-muted">{{ comment.created_at|date:"M d, Y at H:i" }}</small>
+                            </div>
+                            <p class="mb-2">{{ comment.content|linebreaks }}</p>
+                            <div class="d-flex gap-2">
+                                {% if user.is_authenticated %}
+                                <button class="btn btn-sm btn-outline-primary reply-btn" data-comment-id="{{ comment.id }}">
+                                    <i class="fas fa-reply"></i> Reply
+                                </button>
+                                {% if comment.author == user %}
+                                <button class="btn btn-sm btn-outline-secondary edit-btn" data-comment-id="{{ comment.id }}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger delete-btn" data-comment-id="{{ comment.id }}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Replies -->
+                            {% if comment.replies.exists %}
+                            <div class="replies ms-4 mt-3">
+                                {% for reply in comment.replies.all %}
+                                <div class="comment-reply mb-2" id="comment-{{ reply.id }}">
+                                    <div class="d-flex">
+                                        {% if reply.author.profile_picture %}
+                                        <img src="{{ reply.author.profile_picture.url }}" alt="{{ reply.author.username }}" class="author-avatar me-2" style="width: 30px; height: 30px;">
+                                        {% else %}
+                                        <div class="author-avatar bg-secondary d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                            <i class="fas fa-user text-white" style="font-size: 0.8rem;"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between">
+                                                <h6 class="mb-1">
+                                                    <a href="{% url 'users:profile' reply.author.username %}" class="text-decoration-none">
+                                                        {{ reply.author.get_full_name|default:reply.author.username }}
+                                                    </a>
+                                                </h6>
+                                                <small class="text-muted">{{ reply.created_at|date:"M d, Y at H:i" }}</small>
+                                            </div>
+                                            <p class="mb-0">{{ reply.content|linebreaks }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-4">
+                    <i class="fas fa-comments fa-2x text-muted mb-2"></i>
+                    <p class="text-muted">No comments yet. Be the first to comment!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Sidebar -->
+        <aside>
+            <!-- Author Info -->
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    {% if post.author.profile_picture %}
+                    <img src="{{ post.author.profile_picture.url }}" alt="{{ post.author.username }}" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                    {% else %}
+                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 100px; height: 100px;">
+                        <i class="fas fa-user fa-2x text-white"></i>
+                    </div>
+                    {% endif %}
+                    <h5>{{ post.author.get_full_name|default:post.author.username }}</h5>
+                    {% if post.author.bio %}
+                    <p class="text-muted">{{ post.author.bio|truncatewords:30 }}</p>
+                    {% endif %}
+                    <div class="d-flex justify-content-around mb-3">
+                        <div class="text-center">
+                            <strong>{{ post.author.posts.count }}</strong>
+                            <div class="small text-muted">Posts</div>
+                        </div>
+                        <div class="text-center">
+                            <strong>{{ post.author.followers.count }}</strong>
+                            <div class="small text-muted">Followers</div>
+                        </div>
+                        <div class="text-center">
+                            <strong>{{ post.author.following.count }}</strong>
+                            <div class="small text-muted">Following</div>
+                        </div>
+                    </div>
+                    {% if user.is_authenticated and user != post.author %}
+                    <a href="{% url 'users:follow_user' post.author.username %}" class="btn btn-primary btn-sm">Follow</a>
+                    {% endif %}
+                    <a href="{% url 'users:profile' post.author.username %}" class="btn btn-outline-primary btn-sm">View Profile</a>
+                </div>
+            </div>
+
+            <!-- Related Posts -->
+            {% if related_posts %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Related Posts</h5>
+                    {% for related_post in related_posts %}
+                    <div class="mb-3">
+                        <h6>
+                            <a href="{{ related_post.get_absolute_url }}" class="text-decoration-none">
+                                {{ related_post.title }}
+                            </a>
+                        </h6>
+                        <small class="text-muted">
+                            {{ related_post.created_at|date:"M d, Y" }} • {{ related_post.reading_time }} min read
+                        </small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Share -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Share this post</h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-sm" onclick="sharePost()">
+                            <i class="fas fa-share"></i> Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script>
+function sharePost() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ post.title }}',
+            text: '{{ post.excerpt }}',
+            url: window.location.href
+        });
+    } else {
+        // Fallback - copy to clipboard
+        navigator.clipboard.writeText(window.location.href);
+        showToast('Link copied to clipboard!', 'success');
+    }
+}
+
+// Handle reply button clicks
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.reply-btn')) {
+        const commentId = e.target.closest('.reply-btn').dataset.commentId;
+        document.getElementById('parent-comment-id').value = commentId;
+        const modal = new bootstrap.Modal(document.getElementById('commentModal'));
+        modal.show();
+    }
+});
+</script>
+{% endblock %}
